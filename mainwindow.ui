@@ -37,7 +37,72 @@
      </rect>
     </property>
     <property name="text">
-     <string>se deconncter </string>
+     <string>se deconnecter </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="devant">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>70</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>devant</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="droite">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>100</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>--&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="gauche">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>100</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;--</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="derriere">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>130</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>derrière</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stop">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>50</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>STOP</string>
     </property>
    </widget>
   </widget>

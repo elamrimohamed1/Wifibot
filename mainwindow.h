@@ -21,6 +21,16 @@ private slots:
 
     void on_btnSeConnecter_clicked();
 
+    void on_stop_clicked();
+
+    void on_droite_pressed();
+
+    void on_devant_pressed();
+
+    void on_gauche_pressed();
+
+    void on_derriere_pressed();
+
 private:
     Ui::MainWindow *ui;
     MyRobot robot;
