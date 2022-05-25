@@ -114,3 +114,9 @@ void MainWindow::on_derriere_pressed()
     robot.DataToSend[8] = char(Crc>>8);
 }
 
+
+//void MainWindow::on_progressBar_valueChanged(int value)
+{
+
+}
+

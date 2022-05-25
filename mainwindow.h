@@ -31,6 +31,8 @@ private slots:
 
     void on_derriere_pressed();
 
+    void on_progressBar_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
     MyRobot robot;

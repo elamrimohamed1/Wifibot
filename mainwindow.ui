@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="btnSeConnecter">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>120</y>
+      <x>20</x>
+      <y>50</y>
       <width>91</width>
       <height>24</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QPushButton" name="btnSeDeconnecter">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>150</y>
+      <x>20</x>
+      <y>80</y>
       <width>91</width>
       <height>24</height>
      </rect>
@@ -105,6 +105,38 @@
      <string>STOP</string>
     </property>
    </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>118</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>24</number>
+    </property>
+   </widget>
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>240</y>
+      <width>120</width>
+      <height>80</height>
+     </rect>
+    </property>
+   </widget>
+   <zorder>btnSeConnecter</zorder>
+   <zorder>btnSeDeconnecter</zorder>
+   <zorder>devant</zorder>
+   <zorder>droite</zorder>
+   <zorder>gauche</zorder>
+   <zorder>derriere</zorder>
+   <zorder>stop</zorder>
+   <zorder>widget</zorder>
+   <zorder>progressBar</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
