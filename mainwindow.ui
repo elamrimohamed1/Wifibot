@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="btnSeConnecter">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>50</y>
-      <width>91</width>
-      <height>24</height>
+      <x>60</x>
+      <y>220</y>
+      <width>151</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -30,10 +30,10 @@
    <widget class="QPushButton" name="btnSeDeconnecter">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>80</y>
-      <width>91</width>
-      <height>24</height>
+      <x>230</x>
+      <y>220</y>
+      <width>151</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
@@ -43,8 +43,8 @@
    <widget class="QPushButton" name="devant">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>70</y>
+      <x>450</x>
+      <y>50</y>
       <width>75</width>
       <height>24</height>
      </rect>
@@ -56,8 +56,8 @@
    <widget class="QPushButton" name="droite">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>100</y>
+      <x>530</x>
+      <y>90</y>
       <width>75</width>
       <height>24</height>
      </rect>
@@ -69,8 +69,8 @@
    <widget class="QPushButton" name="gauche">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>100</y>
+      <x>370</x>
+      <y>90</y>
       <width>75</width>
       <height>24</height>
      </rect>
@@ -82,7 +82,7 @@
    <widget class="QPushButton" name="derriere">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>450</x>
       <y>130</y>
       <width>75</width>
       <height>24</height>
@@ -95,8 +95,8 @@
    <widget class="QPushButton" name="stop">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>50</y>
+      <x>450</x>
+      <y>90</y>
       <width>75</width>
       <height>24</height>
      </rect>
@@ -105,38 +105,94 @@
      <string>STOP</string>
     </property>
    </widget>
-   <widget class="QProgressBar" name="progressBar">
+   <widget class="QSlider" name="horizontalSlider">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>118</width>
-      <height>23</height>
+      <x>570</x>
+      <y>190</y>
+      <width>160</width>
+      <height>22</height>
      </rect>
     </property>
-    <property name="value">
-     <number>24</number>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QWidget" name="widget" native="true">
+   <widget class="QPushButton" name="MaxSpeed">
+    <property name="geometry">
+     <rect>
+      <x>604</x>
+      <y>233</y>
+      <width>101</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MaxSpeed</string>
+    </property>
+   </widget>
+   <widget class="QWebEngineView" name="Camera" native="true">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>240</y>
-      <width>120</width>
-      <height>80</height>
+      <y>270</y>
+      <width>381</width>
+      <height>261</height>
      </rect>
     </property>
    </widget>
-   <zorder>btnSeConnecter</zorder>
-   <zorder>btnSeDeconnecter</zorder>
-   <zorder>devant</zorder>
-   <zorder>droite</zorder>
-   <zorder>gauche</zorder>
-   <zorder>derriere</zorder>
-   <zorder>stop</zorder>
-   <zorder>widget</zorder>
-   <zorder>progressBar</zorder>
+   <widget class="QPushButton" name="top">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>400</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>top</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="left">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>440</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>left</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttom">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>480</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>buttom</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="right">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>440</y>
+      <width>75</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>right</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -150,6 +206,14 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header location="global">QWebEngineView</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

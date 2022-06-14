@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 #include "myrobot.h"
+#include <qnetworkaccessmanager.h>
+#include <qprogressbar.h>
+#include <QLCDNumber>
+#include <qpushbutton.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,6 +19,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void updateBattery(quint8 battery);
+    void updateIRSensor(quint8 lFront, quint8 rFront, quint8 back);
+
 
 private slots:
     void on_btnSeDeconnecter_clicked();
@@ -31,11 +38,37 @@ private slots:
 
     void on_derriere_pressed();
 
-    void on_progressBar_valueChanged(int value);
+    void updateWindows(const QByteArray);
+
+    void on_horizontalSlider_valueChanged(int value);
+
+    void on_MaxSpeed_clicked(bool checked);
+
+    void on_top_pressed();
+
+    void on_left_pressed();
+
+    void on_buttom_pressed();
+
+    void on_right_pressed();
+
+    void keyPressEvent(QKeyEvent *e);
 
 private:
-    Ui::MainWindow *ui;
+    Ui ::MainWindow *ui;
     MyRobot robot;
+    QNetworkAccessManager *manager;
+    QNetworkRequest request;
+    bool connected;
+    int speed;
+    int MaxSpeed;
+    QLCDNumber *lcdBattery;
+    QPushButton *lFrontSensor;
+    QPushButton *rFrontSensor;
+    QPushButton *backSensor;
+
+    static void updateSensorDisplay(QPushButton *button, quint8 value);
+
 
 };
 #endif // MAINWINDOW_H
