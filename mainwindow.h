@@ -1,74 +1,128 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <QDebug>
+
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QPushButton>
+#include <QWebEngineView>
+#include <QKeyEvent>
 #include "myrobot.h"
-#include <qnetworkaccessmanager.h>
-#include <qprogressbar.h>
-#include <QLCDNumber>
-#include <qpushbutton.h>
+#include <QtGamepad>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui { class Dialog; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+
+class MainWindow : public QDialog
 {
     Q_OBJECT
 
-public:
+public :
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void updateBattery(quint8 battery);
-    void updateIRSensor(quint8 lFront, quint8 rFront, quint8 back);
+
+private slots :
 
 
-private slots:
-    void on_btnSeDeconnecter_clicked();
+    //Connexion
+    void connexion();
 
-    void on_btnSeConnecter_clicked();
+    //Collision
+       void maj_collision();
 
-    void on_stop_clicked();
 
+    //Lancement du mouvement
+    void avancer();
+    void gauche();
+    void droite();
+    void reculer();
+    void stop();
+    void hgauche();
+    void bgauche();
+    void hdroite();
+    void bdroite();
+    void odometrie_g();
+    void odometrie_d();
+
+    //batterie
+    void maj_batterie(QByteArray data);
+    void update();
+
+    //Clavier
+    void keyPressEvent(QKeyEvent* key_robot);
+    void keyReleaseEvent(QKeyEvent* key_robot);
+     void move_xbox();
+
+    //DonnÃ©es du robot
+
+    void on_slide_vitesse_valueChanged(int value);
+
+
+    //Boutons connexion et mouvement
+
+
+    void on_Gauche_pressed();
+    void on_avancer_pressed();
     void on_droite_pressed();
+    void on_reculer_pressed();
+    void on_hgauche_pressed();
+    void on_hdroite_pressed();
+    void on_bgauche_pressed();
+    void on_bdroite_pressed();
+    void on_connexion_clicked();
+    void on_avancer_released();
+    void on_hdroite_released();
+    void on_droite_released();
+    void on_bdroite_released();
+    void on_reculer_released();
+    void on_bgauche_released();
+    void on_Gauche_released();
+    void on_hgauche_released();
 
-    void on_devant_pressed();
+    //Mouvements cameras
+    void on_haut_camera_pressed();
+    void on_gauche_camera_pressed();
+    void on_droite_camera_pressed();
+    void on_bas_camera_pressed();
 
-    void on_gauche_pressed();
+    void cam_haut();
+    void cam_bas();
+    void cam_gauche();
+    void cam_droite();
+    void cam_filtre(int valeur);
+    void cam_reset();
 
-    void on_derriere_pressed();
 
-    void updateWindows(const QByteArray);
-
-    void on_horizontalSlider_valueChanged(int value);
-
-    void on_MaxSpeed_clicked(bool checked);
-
-    void on_top_pressed();
-
-    void on_left_pressed();
-
-    void on_buttom_pressed();
-
-    void on_right_pressed();
-
-    void keyPressEvent(QKeyEvent *e);
 
 private:
-    Ui ::MainWindow *ui;
-    MyRobot robot;
+
+    //Affichage camera
+    QWebEngineView *view;
+    //infrarouge
+    QTimer *TimerReceiveIR;
+    //odo
+    //QTimer *TimerReceiveOD;
+    //Mouvement camera
     QNetworkAccessManager *manager;
     QNetworkRequest request;
-    bool connected;
-    int speed;
-    int MaxSpeed;
-    QLCDNumber *lcdBattery;
-    QPushButton *lFrontSensor;
-    QPushButton *rFrontSensor;
-    QPushButton *backSensor;
+    
+    //Robot
+    MyRobot* robot;
 
-    static void updateSensorDisplay(QPushButton *button, quint8 value);
+    //Manette
+       QGamepad* xbox;
 
+
+    Ui::Dialog *ui;
+    void display_irArD();
+    void display_irAvD();
+    void display_irArG();
+    void display_irAvG();
 
 };
 #endif // MAINWINDOW_H

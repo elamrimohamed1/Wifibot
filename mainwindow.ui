@@ -1,219 +1,356 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>859</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="btnSeConnecter">
-    <property name="geometry">
-     <rect>
-      <x>60</x>
-      <y>220</y>
-      <width>151</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>se connecter </string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnSeDeconnecter">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>220</y>
-      <width>151</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>se deconnecter </string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="devant">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>50</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>devant</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="droite">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>90</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>--&gt;</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="gauche">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>90</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;--</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="derriere">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>130</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>derrière</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="stop">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>90</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>STOP</string>
-    </property>
-   </widget>
-   <widget class="QSlider" name="horizontalSlider">
-    <property name="geometry">
-     <rect>
-      <x>570</x>
-      <y>190</y>
-      <width>160</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="MaxSpeed">
-    <property name="geometry">
-     <rect>
-      <x>604</x>
-      <y>233</y>
-      <width>101</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>MaxSpeed</string>
-    </property>
-   </widget>
-   <widget class="QWebEngineView" name="Camera" native="true">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>270</y>
-      <width>381</width>
-      <height>261</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="top">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>400</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>top</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="left">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>440</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>left</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="buttom">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>480</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>buttom</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="right">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>440</y>
-      <width>75</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>right</string>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QPushButton" name="gauche_camera">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
+     <x>420</x>
+     <y>210</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Gauche</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="titre_vitesse">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>570</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Vitesse</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="hgauche">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>550</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Haut/Gauche</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>411</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="camera"/>
+  </widget>
+  <widget class="QPushButton" name="droite">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>600</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Doite</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="connexion">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>320</y>
+     <width>161</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Connexion</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="slide_vitesse">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>600</y>
+     <width>281</width>
      <height>22</height>
     </rect>
    </property>
+   <property name="minimum">
+    <number>120</number>
+   </property>
+   <property name="maximum">
+    <number>240</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QPushButton" name="bas_camera">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>250</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Bas</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="ir_AvD">
+   <property name="geometry">
+    <rect>
+     <x>870</x>
+     <y>110</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Avant Droite</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="hdroite">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>550</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Haut/Droite</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Gauche">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>610</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Gauche</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="titre_batterie">
+   <property name="geometry">
+    <rect>
+     <x>620</x>
+     <y>10</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Batterie</string>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="barre_batterie">
+   <property name="geometry">
+    <rect>
+     <x>730</x>
+     <y>10</y>
+     <width>118</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>78</number>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="droite_camera">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>210</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Droite</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="avancer">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>500</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Avancer</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="ir_ArD">
+   <property name="geometry">
+    <rect>
+     <x>870</x>
+     <y>150</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Arriere Droite</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="haut_camera">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>170</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Haut</string>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="irAvG">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>70</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="irAvD">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>70</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="irArG">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>110</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="irArD">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>110</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="odometrie_g">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>190</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="odometrie_d">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>190</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>130</y>
+     <width>113</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Mouvement Caméra</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_2">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>40</y>
+     <width>113</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Infrarouges</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_3">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>150</y>
+     <width>113</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Odométrie</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="collision">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>340</y>
+     <width>151</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Recherche de collision</string>
+   </property>
+  </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header location="global">QWebEngineView</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

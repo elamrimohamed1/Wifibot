@@ -1,253 +1,471 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "myrobot.h"
-
-#include <QWebEngineView>
 #include <QUrl>
-#include <QNetworkReply>
-#include <QKeyEvent>
+#include <QWebEngineView>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , robot(parent)
-    , connected(false)
-    , speed(120)
-    , MaxSpeed(0)
-
-
+    : QDialog(parent)
+    , ui(new Ui::Dialog)
 {
+
     ui->setupUi(this);
-    QWebEngineView *page = ui->Camera;
-    page->load(QUrl("http://192.168.1.106:8080/?action=stream"));
-    page->show();
-    connect(&robot, SIGNAL(updateUI(const QByteArray)), this, SLOT(updateWindows(const QByteArray)));
+    TimerReceiveIR = new QTimer(this);
 
 
-    manager = new QNetworkAccessManager();
-        QObject::connect(manager, &QNetworkAccessManager::finished,
-              this, [=](QNetworkReply *reply) {
-                  if (reply->error()) {
-                      qDebug() << reply->errorString();
-                      return;
-                  }
-                  QString answer = reply->readAll();
 
-                  qDebug() << answer;
-        });
+    connect(TimerReceiveIR, &QTimer::timeout, this, &MainWindow::display_irArD);
+    connect(TimerReceiveIR, &QTimer::timeout, this, &MainWindow::display_irAvD);
+    connect(TimerReceiveIR, &QTimer::timeout, this, &MainWindow::display_irArG);
+    connect(TimerReceiveIR, &QTimer::timeout, this, &MainWindow::display_irAvG);
 
-        connect(&robot, &MyRobot::updateUI, this, &MainWindow::updateWindows);
+    //
 
-    lcdBattery = new QLCDNumber(this);
-    lcdBattery->setDigitCount(3);
-    lcdBattery->display(0);
+    TimerReceiveIR->start(100);
+    robot = new MyRobot(this);
+    connect(robot, SIGNAL(updateUI(QByteArray)),this,SLOT(update()));
+
+    //
+    connect(robot,SIGNAL(updateUI(QByteArray)), this, SLOT(odometrie_g()));
+    connect(robot, SIGNAL(updateUI(QByteArray)), this, SLOT(odometrie_d()));
+
+    //
+     xbox = new QGamepad();
+     connect(xbox, SIGNAL(axisLeftXChanged(double)), this, SLOT(move_xbox()));
+     connect(xbox, SIGNAL(axisLeftYChanged(double)), this, SLOT(move_xbox()));
+     connect(xbox, SIGNAL(buttonBChanged(bool)), this, SLOT(stop()));
 
 
+          manager = new QNetworkAccessManager();
+   //Vue de la webcam du robot (independant du robot)
+          view = new QWebEngineView();
+          view->load(QUrl("http://192.168.1.106:8080/?action=stream"));
+          view->show();
+
+       this->ui->camera->addWidget(view);
+
+
+}
+
+void MainWindow::update()
+{
+    QByteArray data = robot->DataReceived;
+    maj_batterie(data);
 }
 
 MainWindow::~MainWindow()
 {
-    if (connected) {
-            robot.disconnect();
-    }
-
     delete ui;
     delete manager;
 }
 
+//UTILISATION DU CLAVIER
 
-void MainWindow::on_btnSeConnecter_clicked()
-{
-    robot.doConnect();
-}
-
-void MainWindow::on_btnSeDeconnecter_clicked()
-{
-    robot.disConnect();
-}
-
-short Crc16(QByteArray Adresse_tab , unsigned char Taille_max)
-{
-    unsigned int Crc = 0xFFFF;
-    unsigned int Polynome = 0xA001;
-    unsigned int CptOctet = 0;
-    unsigned int CptBit = 0;
-    unsigned int Parity= 0;
-    Crc = 0xFFFF;
-    Polynome = 0xA001;
-    for ( CptOctet= 1 ; CptOctet < Taille_max ; CptOctet++)
-    {
-        Crc ^= Adresse_tab[CptOctet] ;
-        for ( CptBit = 0; CptBit <= 7 ; CptBit++)
-        {
-            Parity= Crc;
-            Crc >>= 1;
-            if (Parity%2 == true) Crc ^= Polynome;
-        }
+//Lorsque l'on appuie sur une touche, Ã§a va affectuer une des fonctions
+void MainWindow::keyPressEvent(QKeyEvent* key_robot){
+    switch(key_robot->key()){
+    case Qt::Key_Z :    //Avancer
+        robot->set_etat(1);
+        break;
+    case Qt::Key_Q :    //Gauche
+        robot->set_etat(2);
+        break;
+    case Qt::Key_D :    //Droite
+        robot->set_etat(3);
+        break;
+    case Qt::Key_S :    //Reculer
+        robot->set_etat(4);
+        break;
+    case Qt::Key_R :    //Stop
+        robot->set_etat(5);
+        break;
+    case Qt::Key_W :    //Filtre Gris
+           cam_filtre(1);
+           break;
+       case Qt::Key_X :    //Filtre
+           cam_filtre(2);
+           break;
+       case Qt::Key_C :
+           cam_filtre(3);
+           break;
+       case Qt::Key_V :
+           cam_filtre(4);
+           break;
+       case Qt::Key_B :
+           cam_filtre(5);
+           break;
+       case Qt::Key_H :
+           cam_filtre(6);
+           break;
+       case Qt::Key_J :
+           cam_filtre(7);
+           break;
+       case Qt::Key_N :
+           cam_reset();
+           break;
     }
-    return(Crc);
 }
 
-void MainWindow::on_stop_clicked()
+//Lorsque l'on relache, on s'arrete
+void MainWindow::keyReleaseEvent(QKeyEvent* key_robot){
+    robot->set_etat(5);
+}
+
+//Fonctions reliees aux boutons :
+void MainWindow::connexion()
 {
-    robot.DataToSend[0] = 0xFF;
-    robot.DataToSend[1] = 0x07;
-    robot.DataToSend[2] = 0x0;
-    robot.DataToSend[3] = 0x0;
-    robot.DataToSend[4] = 0x0;
-    robot.DataToSend[5] = 0x0;
-    robot.DataToSend[6] = 0x0;
-    robot.DataToSend[7] = 0x0;
-    robot.DataToSend[8] = 0x0;
+   robot->doConnect();
 }
 
+void MainWindow::avancer()
+{
+    robot->set_etat(1);
+
+}
+
+void MainWindow::gauche()
+{
+     robot->set_etat(2);
+}
+
+void MainWindow::droite()
+{
+     robot->set_etat(3);
+}
+
+void MainWindow::reculer()
+{
+     robot->set_etat(4);
+}
+
+void MainWindow::stop()
+{
+     robot->set_etat(5);
+}
+
+void MainWindow::hgauche()
+{
+     robot->set_etat(6);
+}
+
+void MainWindow::bgauche()
+{
+     robot->set_etat(7);
+}
+
+void MainWindow::hdroite()
+{
+     robot->set_etat(8);
+}
+
+void MainWindow::bdroite()
+{
+     robot->set_etat(9);
+}
+
+
+//MOUVEMENT INTERFACE
+void MainWindow::on_Gauche_pressed()
+{
+    gauche();
+}
+
+void MainWindow::on_avancer_pressed()
+{
+    avancer();
+}
 
 void MainWindow::on_droite_pressed()
 {
-    robot.DataToSend[0] = 0xFF;
-    robot.DataToSend[1] = 0x07;
-    robot.DataToSend[2] = 120;
-    robot.DataToSend[4] = 60;
-    robot.DataToSend[6] = 80;
-    short Crc=Crc16(robot.DataToSend,7);
-    robot.DataToSend[7] = char(Crc);
-    robot.DataToSend[8] = char(Crc>>8);
+    droite();
 }
 
-
-void MainWindow::on_devant_pressed()
+void MainWindow::on_reculer_pressed()
 {
-    robot.DataToSend[0] = 0xFF;
-    robot.DataToSend[1] = 0x07;
-    robot.DataToSend[2] = 120;
-    robot.DataToSend[4] = 120;
-    robot.DataToSend[6] = 80;
-    short Crc=Crc16(robot.DataToSend,7);
-    robot.DataToSend[7] = char(Crc);
-    robot.DataToSend[8] = char(Crc>>8);
+    reculer();
 }
 
-
-void MainWindow::on_gauche_pressed()
+void MainWindow::on_hgauche_pressed()
 {
-    robot.DataToSend[0] = 0xFF;
-    robot.DataToSend[1] = 0x07;
-    robot.DataToSend[2] = 60;
-    robot.DataToSend[4] = 120;
-    robot.DataToSend[6] = 80;
-    short Crc=Crc16(robot.DataToSend,7);
-    robot.DataToSend[7] = char(Crc);
-    robot.DataToSend[8] = char(Crc>>8);
+    hgauche();
 }
 
-
-void MainWindow::on_derriere_pressed()
+void MainWindow::on_hdroite_pressed()
 {
-    robot.DataToSend[0] = 0xFF;
-    robot.DataToSend[1] = 0x07;
-    robot.DataToSend[2] = 120;
-    robot.DataToSend[4] = 120;
-    robot.DataToSend[6] = 0;
-    short Crc=Crc16(robot.DataToSend,7);
-    robot.DataToSend[7] = char(Crc);
-    robot.DataToSend[8] = char(Crc>>8);
+    hdroite();
+}
+
+void MainWindow::on_bgauche_pressed()
+{
+    bgauche();
+}
+
+void MainWindow::on_bdroite_pressed()
+{
+    bdroite();
+}
+
+void MainWindow::on_connexion_clicked()
+{
+    connexion();
+}
+
+void MainWindow::on_avancer_released()
+{
+    stop();
+}
+
+void MainWindow::on_hdroite_released()
+{
+    stop();
+}
+
+void MainWindow::on_droite_released()
+{
+    stop();
+}
+
+void MainWindow::on_bdroite_released()
+{
+    stop();
+}
+
+void MainWindow::on_reculer_released()
+{
+    stop();
+}
+
+void MainWindow::on_bgauche_released()
+{
+    stop();
+}
+
+void MainWindow::on_Gauche_released()
+{
+    stop();
+}
+
+void MainWindow::on_hgauche_released()
+{
+    stop();
 }
 
 
-void MainWindow::on_top_pressed()
+
+//CHANGEMENT VITESSE ET AFFICHAGE
+void MainWindow::on_slide_vitesse_valueChanged(int value)
+{
+    //Change la vitesse du robot
+    robot->set_vitesse(value);
+    //Affiche la vitesse et le pourcentage sur l'interface
+    int vit = robot->get_vitesse();
+    QString vit_string = QString::number(vit);
+    double pourcentage = ((vit-120)*100/120);
+    QString pourcentage_string = QString::number(pourcentage);
+    ui->titre_vitesse->setText(vit_string + " (" + pourcentage_string + "%)");
+
+}
+
+//MOUVEMENT CAMERA
+void MainWindow::on_haut_camera_pressed()
+{
+    cam_haut();
+}
+
+void MainWindow::on_gauche_camera_pressed()
+{
+    cam_gauche();
+}
+
+void MainWindow::on_droite_camera_pressed()
+{
+    cam_droite();
+}
+
+void MainWindow::on_bas_camera_pressed()
+{
+    cam_bas();
+}
+
+void MainWindow::cam_haut()
 {
     request.setUrl(QUrl("http://192.168.1.106:8080/?action=command&dest=0&plugin=0&id=10094853&group=1&value=-200"));
-            manager->get(request);
-
+    manager->get(request);
 }
-
-
-void MainWindow::on_left_pressed()
-{
-    request.setUrl(QUrl("http://192.168.1.106:8080/?action=command&dest=0&plugin=0&id=10094852&group=1&value=200"));
-                manager->get(request);
-
-}
-
-
-void MainWindow::on_buttom_pressed()
+void MainWindow::cam_bas()
 {
     request.setUrl(QUrl("http://192.168.1.106:8080/?action=command&dest=0&plugin=0&id=10094853&group=1&value=200"));
-            manager->get(request);
+    manager->get(request);
 
 }
-
-
-void MainWindow::on_right_pressed()
+void MainWindow::cam_gauche()
+{
+    request.setUrl(QUrl("http://192.168.1.106:8080/?action=command&dest=0&plugin=0&id=10094852&group=1&value=200"));
+    manager->get(request);
+}
+void MainWindow::cam_droite()
 {
     request.setUrl(QUrl("http://192.168.1.106:8080/?action=command&dest=0&plugin=0&id=10094852&group=1&value=-200"));
-               manager->get(request);
-
+    manager->get(request);
 }
 
+//Affichage Batterie
+
+void MainWindow::maj_batterie(QByteArray data){    //A tester
 
 
-void MainWindow::on_horizontalSlider_valueChanged(int value)
-{
-    speed=value;
-}
+      //Recupération de la valeur du robot
+    unsigned char batterie = (data[2]);
+    int valeur = (int)batterie;
+    //Passage en pourcentage
+    valeur = (valeur*100)/130;
+    QString bat_string = QString::number(valeur);
 
+    //Verification de l'état de la batterie : en marche, plus de batterie ou normal
+    if(((unsigned int) valeur <= 100) && ((unsigned int) valeur > 0)){  //Normal
+        ui->barre_batterie->setValue(valeur); //Si marche pas : test avec (int)robot->DataReceived[2]
+        ui->titre_batterie->setText("Batterie : " + bat_string + "%");
 
-void MainWindow::on_MaxSpeed_clicked(bool checked)
-{
-    {
-        if(checked==true){
-            MaxSpeed=1;
-        }
-        else{
-            MaxSpeed=0;
-        }
     }
+    else if(((unsigned int) valeur > 100)){ //En charge
+        ui->barre_batterie->setValue(100);
+        ui->titre_batterie->setText("Plus de batterie");
+
+    }
+    else{   //Plus de batterie
+        ui->barre_batterie->setValue(0);
+
+    }
+
+
+
 }
 
-void MainWindow::updateBattery(quint8 battery)
+void MainWindow::display_irArD()
 {
-    if(battery > 175)
-    {
-        lcdBattery->display(100);
-        lcdBattery->setStyleSheet("background-color: dark; color: rgb(0, 255, 0); border-radius: 10px;border-width: 2px");
+    int ir=robot->get_irArD();
+    ui->irArD->display(ir);
+
+}
+
+void MainWindow::display_irAvD()
+{
+    int ir=robot->get_irAvD();
+    ui->irAvD->display(ir);
+
+
+
+}
+
+void MainWindow::display_irArG()
+{
+    int ir=robot->get_irArG();
+    ui->irArG->display(ir);
+
+
+}
+
+void MainWindow::display_irAvG()
+{
+    int ir=robot->get_irAvG();
+    ui->irAvG->display(ir);
+
+}
+
+void MainWindow::odometrie_g()
+{
+    long odo =long((((long)robot->DataReceived[8] << 24))+(((long)robot->DataReceived[7] << 16)) +(((long)robot->DataReceived[6] << 8)) +((long)robot->DataReceived[5]));
+        odo = (unsigned int) odo/2448;
+         ui->odometrie_d->display((int)odo);
+        qDebug()<<"odometrieG;";
+}
+
+void MainWindow::odometrie_d( )
+{
+    long odo =long((((long)robot->DataReceived[16] << 24))+(((long)robot->DataReceived[15] << 16)) +(((long)robot->DataReceived[14] << 8)) +((long)robot->DataReceived[13]));
+        odo = (unsigned int)odo/2448;
+         ui->odometrie_d->display((int)odo);
+          qDebug()<<"odometrieD;";
+
+}
+
+
+void MainWindow::cam_filtre(int valeur)
+{
+    //On envoie des requêtes Javascript pour appliquer des filtres
+    switch(valeur){
+    case 1 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' grayscale(100%)';");
+        break;
+    case 2 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' invert(100%)';");
+        break;
+    case 3 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' sepia(100%)';");
+        break;
+    case 4 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' blur(5px)';");
+        break;
+    case 5 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' saturate(200%)';");
+        break;
+    case 6 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' hue-rotate(180deg)';");
+        break;
+    case 7 :
+        view->page()->runJavaScript("var filtres = document.body.firstChild.style.webkitFilter; document.body.firstChild.style.webkitFilter = filtres+' brightness(50%)';");
+        break;
     }
-    else if(battery >100)
+
+}
+void MainWindow::cam_reset()
+{
+    view->page()->runJavaScript("document.body.firstChild.style.webkitFilter = ''");
+}
+
+//ANNONCE OBSTACLE
+void MainWindow::maj_collision(){
+    //On recupere les valeurs des infrarouges et on affiche si une valeur est supérieure à 100
+    unsigned char  irAvG= robot->DataReceived[3];
+    QString valeur_avg = QString::number(irAvG);
+    int val_avg = valeur_avg.toInt();
+    unsigned char irAvD = robot->DataReceived[11];
+    QString valeur_avd = QString::number(irAvD);
+    int val_avd = valeur_avd.toInt();
+    unsigned char irArD = robot->DataReceived[4];
+    QString valeur_ard = QString::number(irArD);
+    int val_ard = valeur_ard.toInt();
+    if ((val_avg > 100) && (val_avg > val_avd) && (val_avg > val_ard))
     {
-        lcdBattery->display(100);
-        lcdBattery->setStyleSheet("background-color: dark; color: rgb(255, 0, 0); border-radius: 10px;border-width: 2px");
+        ui->collision->setText("Attention, obstacle detecté devant à gauche");
+    }
+    else if ((val_avd > 100) && (val_avd > val_avg) && (val_avd > val_ard))
+    {
+        ui->collision->setText("Attention, obstacle detecté devant à droite");
+    }
+    else if ((val_ard > 100) && (val_ard > val_avg) && (val_ard > val_avd))
+    {
+        ui->collision->setText("Attention, obstacle detecté derriere à droite");
     }
     else
     {
-        lcdBattery->setStyleSheet("background-color: dark; color: rgb(255, 0, 0); border-radius: 10px;border-width: 2px");
-        lcdBattery->display(battery);
+        ui->collision->setText("aucun obstacle detecté");
     }
 
 }
 
-void MainWindow::updateWindows(const QByteArray data)
+void MainWindow::move_xbox()
 {
-    this->updateBattery(data[2]);
-}
 
-void MainWindow::keyPressEvent(QKeyEvent *e){
-    if(e->key() == Qt::Key_Z) { //si la touche "Z" est enfoncée alors on fait appel à la fonction pour faire avancer le robot avec les boutons
-        this->on_devant_pressed();
+
+    //  Nouveau fonctionnement manette
+
+    if((xbox->axisLeftX() == 0) && (xbox->axisLeftY() ==0)){
+        robot->set_manette(false);
+    }
+    else{
+        robot->set_xbox_x(xbox->axisLeftX());
+        robot->set_xbox_y(xbox->axisLeftY());
+        robot->set_manette(true);
     }
 
-    else if(e->key() == Qt::Key_D) {//si la touche "D" est enfoncée alors on fait appel à la fonction pour faire tourner le robot à droite avec les boutons
-        this->on_droite_pressed();
-    }
-
-    else if(e->key() == Qt::Key_S) {//si la touche "S" est enfoncée alors on fait appel à la fonction pour faire reculer le robot avec les boutons
-        this->on_derriere_pressed();
-    }
-
-    else if(e->key() == Qt::Key_Q) {//si la touche "Q" est enfoncée alors on fait appel à la fonction pour faire tourner à gauche le robot avec les boutons
-        this->on_gauche_pressed();
-    }
-
-    else if(e->key() == Qt::Key_Space) {//si la barre epace est enfoncée alors on fait appel à la fonction pour arrêter le robot avec les boutons
-        this->on_stop_clicked();
-    }
 }

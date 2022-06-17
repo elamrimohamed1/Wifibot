@@ -2,6 +2,7 @@
 #define MYROBOT_H
 
 #include <QObject>
+//On inclut le module network dans le fichier .pro
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QDebug>
@@ -9,12 +10,27 @@
 #include <QMutex>
 
 class MyRobot : public QObject {
-    Q_OBJECT
+    Q_OBJECT;
 public:
-    explicit MyRobot(QObject *parent = 0);
+    explicit MyRobot(QObject *parent = 0);  //MyTcpClient (ancien nom sur le fichier original)
     void doConnect();
     void disConnect();
-    void update(short gspeed, short dspeed, float godometry, float dodometry);
+    void move(int cas);
+    void move_xbox();
+    void set_vitesse(int valeur);
+    void set_etat(int valeur);
+    void set_manette(bool valeur);
+    void set_xbox_x(double valeur);
+    void set_xbox_y(double valeur);
+    int get_vitesse();
+    int get_irArG();
+    int get_irAvD();
+    int get_irAvG();
+    int get_irArD();
+
+
+    //short Crc16(unsigned char *Adresse_tab , unsigned char Taille_max);
+    qint64 Crc16(QByteArray Adresse_tab , int Taille_max);
     QByteArray DataToSend;
     QByteArray DataReceived;
     QMutex Mutex;
@@ -27,16 +43,16 @@ public slots:
     void bytesWritten(qint64 bytes);
     void readyRead();
     void MyTimerSlot();
-    short Crc16(QByteArray Adresse_tab,unsigned int Taille_max);
-    void velocityRight(quint8 value);
-    void velocityLeft(quint8 value);
-    void move(unsigned char dir, unsigned char rVelocity, unsigned char lVelocity);
-
 
 private:
     QTcpSocket *socket;
     QTimer *TimerEnvoi;
-    quint16 crc16(unsigned int pos);
+    int m_vitesse;  //vitesse actuelle
+    int m_etat; //etats : avancer/aller Ã  gauche...
+    //Pour la manette
+    bool m_manette;    //Si true : L'utilisateur utilise la manette
+    double m_xbox_x;
+    double m_xbox_y;
 };
 
 #endif // MYROBOT_H

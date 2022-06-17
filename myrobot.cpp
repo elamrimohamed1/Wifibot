@@ -1,19 +1,29 @@
 #include "myrobot.h"
-
+#include <cmath>
+#include <math.h>
 
 MyRobot::MyRobot(QObject *parent) : QObject(parent) {
+
+    m_etat = 0;
+    m_manette = false;
     DataToSend.resize(9);
-    DataToSend[0] = 0xFF;
-    DataToSend[1] = 0x07;
+                          //Pour A eviter le CRC (ne pas changer)
+    DataToSend[0] = 0xFF; //Taille (ne pas changer)
+    DataToSend[1] = 0x07;   //Vitesse de la gauche
     DataToSend[2] = 0x0;
     DataToSend[3] = 0x0;
+    //Vitesse de la droite
     DataToSend[4] = 0x0;
     DataToSend[5] = 0x0;
+    //A determiner
     DataToSend[6] = 0x0;
+    //CRC (ne pas changer)
     DataToSend[7] = 0x0;
     DataToSend[8] = 0x0;
     DataReceived.resize(21);
     TimerEnvoi = new QTimer();
+    //Initialisation de la vitesse
+    m_vitesse = 120;
     // setup signal and slot
     connect(TimerEnvoi, SIGNAL(timeout()), this, SLOT(MyTimerSlot())); //Send data to wifibot timer
 }
@@ -55,74 +65,265 @@ void MyRobot::bytesWritten(qint64 bytes) {
 }
 
 void MyRobot::readyRead() {
-    qDebug() << "reading..."; // read the data from the socket
-    DataReceived = socket->readAll();
-    emit updateUI(DataReceived);
-    qDebug() << DataReceived[0] << DataReceived[1] << DataReceived[2];
+
 }
 
 void MyRobot::MyTimerSlot() {
     qDebug() << "Timer...";
+    if(m_manette == false){
+        move(m_etat);
+    }
+    else{
+        move_xbox();
+    }
+
     while(Mutex.tryLock());
     socket->write(DataToSend);
+        qDebug() << "reading..."; // read the data from the socket
+    DataReceived = socket->readAll();
+    emit updateUI(DataReceived);
     Mutex.unlock();
 }
 
-void MyRobot::velocityRight(quint8 value)
-{
-    while(Mutex.tryLock());
-    this->DataToSend[4] = value;
-    Mutex.unlock();
-}
-void MyRobot::velocityLeft(quint8 value)
-{
-    while(Mutex.tryLock());
-    this->DataToSend[2] = value;
+void MyRobot::move(int cas){
+
+    //A Eviter le CRC (ne pas changer)
+    DataToSend[0] = 0xFF;
+    //Taille (ne pas changer)
+    DataToSend[1] = 0x07;
+    //Vitesse de la gauche
+    DataToSend[2] = 0x0;
+    DataToSend[3] = 0x0;
+    //Vitesse de la droite
+    DataToSend[4] = 0x0;
+    DataToSend[5] = 0x0;
+    //Avancer ou reculer
+    DataToSend[6] = 0x0;
+
+       Mutex.tryLock();
+    switch(cas) {
+    case 1 :    //Avancer
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;   //F0 pour 240 : 78 pour 120     B4 pour 180
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x50;
+        break;
+    case 2 :    //gauche
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x10;   //Aller que Ã  doite = 16
+        break;
+    case 3 :    //droite
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x40;   //Aller que Ã  gauche = 64
+        break;
+    case 4 :    //reculer
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        break;
+    case 5 :    //STOP
+        break;
+    case 6 :    //haut gauche
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x50;
+        break;
+    case 7 :    //bas gauche
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        break;
+    case 8 :    //haut droite
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x50;
+        break;
+    case 9 :    //bas droite
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;
+        break;
+    case 10 :   //test de manette
+        //Vitesse de la gauche
+        DataToSend[2] = m_vitesse;   //F0 pour 240 (on sait jamais)  78 pour 120     B4 pour 180
+        //Vitesse de la droite
+        DataToSend[4] = m_vitesse;
+        //Avancer ou reculer
+        DataToSend[6] = 0x50;
+        break;
+    }
+    DataToSend[7] = 0x0;
+    qint64 c16 = Crc16(DataToSend, 1);  //7 octets hors CRC
+
+    //CRC (ne pas changer)
+    DataToSend[7] = (unsigned char)c16;    //Partie basse du CRC
+    DataToSend[8] = (unsigned char)(c16 >> 8);   //Partie haute
+
+
     Mutex.unlock();
 }
 
-short MyRobot::Crc16(QByteArray Adresse_tab,unsigned int Taille_max){
-    unsigned short crc = 0xFFFF;
-    unsigned short polynome = 0xA001;
-    unsigned short parity = 0;
-    unsigned short CptBit = 0;
+void MyRobot::move_xbox(){
 
-    for(auto it=Adresse_tab.begin()+1; it != Adresse_tab.begin()+Taille_max;it++){
-     crc ^= *it;
-        for(CptBit=0; CptBit <= 7; CptBit++){
-            parity = crc;
-            crc >>=1;
-                if(parity%2 == true) crc ^= polynome;
+    //Pour Ã©viter le CRC (ne pas changer)
+    DataToSend[0] = 0xFF;
+    //Taille (ne pas changer)
+    DataToSend[1] = 0x07;
+    //Vitesse de la gauche
+    DataToSend[2] = 0x0;
+    DataToSend[3] = 0x0;
+    //Vitesse de la droite
+    DataToSend[4] = 0x0;
+    DataToSend[5] = 0x0;
+    //Avancer ou reculer
+    DataToSend[6] = 0x0;
+
+    Mutex.tryLock();
+
+    //On parcourt le cercle trigonomÃ©trique dans le sens des aiguilles d'une montre
+    if((m_xbox_x > 0) && (m_xbox_y < 0)){
+        if(-(m_xbox_y) > m_xbox_x){   //Cas 1
+            DataToSend[2] = m_vitesse;
+            DataToSend[4] = m_vitesse - ((2*m_xbox_x/sqrt(2))*m_vitesse);
+            DataToSend[6] = 0x50;   //Avancer gauche et droite
+        }
+        else {  //Cas 2
+            DataToSend[2] = m_vitesse;
+            DataToSend[4] = m_vitesse - ((2*m_xbox_y/sqrt(2))*m_vitesse);
+            DataToSend[6] = 0x40;   //Avancer gauche
+        }
+    }
+    else if((m_xbox_x > 0) && (m_xbox_y > 0)){
+        if(m_xbox_y < m_xbox_x){   //Cas 3
+            DataToSend[2] = m_vitesse;
+            DataToSend[4] = m_vitesse - ((-2*m_xbox_y/sqrt(2))*m_vitesse);
+            DataToSend[6] = 0x10;   //Reculer gauche : Pour reculer vers la droite on doit faire avancer la roue de droite et faire reculer la roue de gauche
+        }
+        else {  //Cas 4
+            DataToSend[2] = m_vitesse;
+            DataToSend[4] = m_vitesse - ((2*m_xbox_x/sqrt(2))*m_vitesse);
+            DataToSend[6] = 0x0;    //Reculer
+        }
+    }
+    else if((m_xbox_x < 0) && (m_xbox_y > 0)){
+        if(m_xbox_y > -(m_xbox_x)){   //Cas 5
+            DataToSend[2] = m_vitesse - ((-2*m_xbox_x/sqrt(2))*m_vitesse);
+            DataToSend[4] = m_vitesse;
+            DataToSend[6] = 0x0;   //Reculer
+        }
+        else {  //Cas 6
+            DataToSend[2] = m_vitesse - ((-2*m_xbox_y/sqrt(2))*m_vitesse);
+            DataToSend[4] = m_vitesse;
+            DataToSend[6] = 0x40;    //Reculer droite : Pour reculer vers la gauche on doit faire avancer la roue de gauche et faire reculer la roue de droite
+        }
+    }
+    else if((m_xbox_x < 0) && (m_xbox_y < 0)){
+        if(-(m_xbox_y) < -(m_xbox_x)){   //Cas 7
+            DataToSend[2] = m_vitesse - ((2*m_xbox_y/sqrt(2))*m_vitesse);
+            DataToSend[4] = m_vitesse;
+            DataToSend[6] = 0x10;   //Avancer droite
+        }
+        else {  //Cas 8
+            DataToSend[2] = m_vitesse - ((-2*m_xbox_x/sqrt(2))*m_vitesse);
+            DataToSend[4] = m_vitesse;
+            DataToSend[6] = 0x50;   //Avancer gauche et droite
         }
     }
 
-    return crc;
+
+    DataToSend[7] = 0x0;
+    qint64 c16 = Crc16(DataToSend, 1);  //7 octets hors CRC
+
+    //CRC (ne pas changer)
+    DataToSend[7] = (unsigned char)c16;    //Partie basse du CRC
+    DataToSend[8] = (unsigned char)(c16 >> 8);   //Partie haute
+
+
+    Mutex.unlock();
 }
 
-void MyRobot::move(unsigned char dir, unsigned char rVelocity, unsigned char lVelocity)
+qint64 MyRobot::Crc16(QByteArray Adresse_tab , int pos)
 {
-    qDebug()<<dir;
-    while(Mutex.tryLock());
-    this->DataToSend[2] = lVelocity;
-    this->DataToSend[4] = rVelocity;
-    switch(dir){
-    case 0:
-        this->DataToSend[6] = 0b01010000; // Avant
-        break;
-    case 1:
-        this->DataToSend[6] = 0b00010000; // G
-        break;
-    case 2:
-        this->DataToSend[6] = 0b01000000; // D
-        break;
-    case 3:
-        this->DataToSend[6] = 0b00000000; // Arr
-        break;
-    default:
-        this->DataToSend[2] = 0; // Vitesse  à 0
-        this->DataToSend[4] = 0; // Vitesse  à 0
-        break;
+Adresse_tab.data();
+unsigned char *data = (unsigned char*)Adresse_tab.constData();
+qint64 Crc = 0xFFFF;
+qint64 Polynome = 0xA001;
+qint64 Parity= 0;
+for (; pos < Adresse_tab.length() - 2; pos++) //7 octets
+    {
+    Crc ^= *(data+pos);
+    for ( unsigned int CptBit = 0; CptBit <= 7 ; CptBit++)  //8 bits (par octets)
+        {
+        Parity= Crc;
+        Crc >>= 1;
+        if (Parity%2 == true) Crc ^= Polynome;
+        }
     }
-    Mutex.unlock();
+return Crc;
+}
+
+void MyRobot::set_vitesse(int valeur){
+    m_vitesse = valeur;
+}
+
+int MyRobot::get_vitesse(){
+    return m_vitesse;
+}
+
+void MyRobot::set_etat(int valeur){
+    m_etat = valeur;
+}
+
+void MyRobot::set_manette(bool valeur){
+    m_manette = valeur;
+}
+
+void MyRobot::set_xbox_x(double valeur){
+    m_xbox_x = valeur;
+}
+
+void MyRobot::set_xbox_y(double valeur){
+    m_xbox_y = valeur;
+}
+
+int MyRobot::get_irArG()
+{
+    int ir;
+   ir=DataReceived[12];
+    return ir;
+}
+
+int MyRobot::get_irAvG()
+{
+    unsigned char IR=DataReceived[3];
+    int ir=(int)IR;
+    return ir;
+}
+
+int MyRobot::get_irArD()
+{
+
+    unsigned char IR=DataReceived[4];
+     int ir=(int)IR;
+    return ir;
+}
+
+int MyRobot::get_irAvD()
+{
+
+    unsigned char IR=DataReceived[11];
+    int ir=(int)IR;
+    return ir;
 }
 
