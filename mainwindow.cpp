@@ -323,12 +323,11 @@ void MainWindow::maj_batterie(QByteArray data){    //A tester
     //Verification de l'état de la batterie : en marche, plus de batterie ou normal
     if(((unsigned int) valeur <= 100) && ((unsigned int) valeur > 0)){  //Normal
         ui->barre_batterie->setValue(valeur); //Si marche pas : test avec (int)robot->DataReceived[2]
-        ui->titre_batterie->setText("Batterie : " + bat_string + "%");
 
     }
     else if(((unsigned int) valeur > 100)){ //En charge
         ui->barre_batterie->setValue(100);
-        ui->titre_batterie->setText("Plus de batterie");
+
 
     }
     else{   //Plus de batterie
@@ -375,7 +374,7 @@ void MainWindow::odometrie_g()
 {
     long odo =long((((long)robot->DataReceived[8] << 24))+(((long)robot->DataReceived[7] << 16)) +(((long)robot->DataReceived[6] << 8)) +((long)robot->DataReceived[5]));
         odo = (unsigned int) odo/2448;
-         ui->odometrie_d->display((int)odo);
+         ui->odometrie_g->display((int)odo);
         qDebug()<<"odometrieG;";
 }
 
@@ -422,6 +421,7 @@ void MainWindow::cam_reset()
     view->page()->runJavaScript("document.body.firstChild.style.webkitFilter = ''");
 }
 
+
 //ANNONCE OBSTACLE
 void MainWindow::maj_collision(){
     //On recupere les valeurs des infrarouges et on affiche si une valeur est supérieure à 100
@@ -437,14 +437,17 @@ void MainWindow::maj_collision(){
     if ((val_avg > 100) && (val_avg > val_avd) && (val_avg > val_ard))
     {
         ui->collision->setText("Attention, obstacle detecté devant à gauche");
+        robot->set_etat(5);
     }
     else if ((val_avd > 100) && (val_avd > val_avg) && (val_avd > val_ard))
     {
         ui->collision->setText("Attention, obstacle detecté devant à droite");
+        robot->set_etat(5);
     }
     else if ((val_ard > 100) && (val_ard > val_avg) && (val_ard > val_avd))
     {
         ui->collision->setText("Attention, obstacle detecté derriere à droite");
+        robot->set_etat(5);
     }
     else
     {

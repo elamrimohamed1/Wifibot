@@ -12,6 +12,9 @@ MyRobot::MyRobot(QObject *parent) : QObject(parent) {
     DataToSend[1] = 0x07;   //Vitesse de la gauche
     DataToSend[2] = 0x0;
     DataToSend[3] = 0x0;
+    //Vitesse de la droite
+    DataToSend[4] = 0x0;
+    DataToSend[5] = 0x0;
     //A determiner
     DataToSend[6] = 0x0;
     //CRC (ne pas changer)
@@ -296,8 +299,8 @@ void MyRobot::set_xbox_y(double valeur){
 
 int MyRobot::get_irArG()
 {
-    int ir;
-   ir=DataReceived[12];
+    unsigned char IR=DataReceived[12];
+    int ir=(int)IR;
     return ir;
 }
 
